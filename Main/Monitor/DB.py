@@ -1,6 +1,6 @@
 import sqlite3 as sql
 from datetime import datetime
-from random import random
+from random import random, randint
 
 def main()->None:
     try:
@@ -18,6 +18,7 @@ def main()->None:
         con.execute(query)
 
         dateTime = datetime.now()
+        dateRand = datetime(randint(2020, 2025), randint(1,12),randint(1,28), randint(0,23), randint(0,59))
 
         queryDT = dateTime.isoformat(sep=" ",timespec="minutes")
         otherTimes = ["2024-09-22 12:30",
