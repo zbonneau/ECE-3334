@@ -26,21 +26,12 @@ def drawGraph(df:pd.DataFrame, x: str, y:list[str])->None:
     ax.plot(x_axis, y_axis)
     plot.show()
 
-# def getData(con:sql.Connection, dateStart:str, dateEnd: str)->tuple[tuple[any]]:
-#     try:
-#         cursor:sql.Cursor = con.cursor()
-
-#         query = """
-#         SELECT 
-#         """
-
 def main():
     con = sql.connect("Main\\Monitor\\test.db")
 
-    generator.generate(con, 10000)
+    generator.generateSequence(con, 10000)
 
-    df = getWindow(con, "2024", "2024-12-31")
-    df.describe()
+    df = getWindow(con, "2024-10", "2024-10-31")
 
     con.close()
 

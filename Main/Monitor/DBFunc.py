@@ -1,35 +1,58 @@
 import sqlite3 as sql
 
 
-def DBInit(path:str)->sql.Connection:
+def DBInit(path:str)->tuple[sql.Connection,str]:
     try:
         con = sql.connect(path)
-        return con
+        return (con, None)
     except sql.Error as error:
-        return None
+        return (None, error.__str__)
     
-def DBClose(con:sql.Connection)->bool:
+def DBClose(con:sql.Connection)->tuple[bool,str]:
     try:
         con.close()
-        return True
+        return True, None
     except sql.Error as error:
-        return False
+        return (False, error.__str__())
     
-def DBInsert(con:sql.Connection, query:str, params:tuple[any])->bool:
+def DBInsert(con:sql.Connection, query:str, params:tuple[any])->tuple[bool,str]:
     try:
         con.execute(query, params)
-        con.commit()
-        return True
+        return (True,None)
     except sql.Error as error:
-        return False
+        return (False, error.__str__())
+
+def DBCommit(con:sql.Connection)->tuple[bool, str]:
+    try:
+        con.commit()
+        return (True, None)
+    except sql.Error as error:
+        return (False, error.__str__())
+
+def stringParse(string: str, args:int)->tuple[any]:
+    split = string.split(",")
+
+    if (split.__len__() != args):
+        return None
+    
+    params = (
+        split[0],
+        (int)(split[1]),
+        (float)(split[2]),
+        (float)(split[3]),
+        (float)(split[4])
+    )
+
+    return params
+
     
 def main():
     path:str = "Main\\Monitor\\test.db"
 
-    con:sql.Connection = DBInit(path)
+    con, error = DBInit(path)
 
     if con is None:
-        print("Failed to connect")
+        print(error)
         return
     
     con.execute("""CREATE TABLE IF NOT EXISTS func(
@@ -39,26 +62,26 @@ def main():
                 HUMIDITY REAL,
                 MOISTURE REAL);""")
     
+    query:str = """INSERT INTO func VALUES(?,?,?,?,?);"""
     while(1):
         entry: str = input("Give entry (D,Hs,T,Hm,M): ")
 
         if (entry == 'q'):
             break
 
-        params:tuple[any] = entry.split(' ')
-        if (params.__len__() != 5):
-            print("Bad params")
+        if (entry == 'c'):
+            success, error = DBCommit(con)
+            if (not success):
+                print(error)
             continue
 
-        fparams = (params[0],
-                (int)(params[1]), 
-                (float)(params[2]), 
-                (float)(params[3]), 
-                (float)(params[4]))
-        
-        query:str = """INSERT INTO func VALUES(?,?,?,?,?);"""
-        if not DBInsert(con,query,fparams):
-            print("insert failed")
+        fparams = stringParse(entry, 5)
+        if not fparams:
+            print("Bad Message ->",entry)
+            continue
+        success, error = DBInsert(con,query,fparams)
+        if not success:
+            print(error)
         
 
     DBClose(con)
