@@ -4,12 +4,13 @@ import pandas as pd
 import DBFunc as db
 import DBGenerator as generator
 
-def getWindow(con:sql.Connection, dateStart: str, dateEnd: str)->pd.DataFrame:
+def getWindow(con:sql.Connection, dateStart: str, dateEnd: str, house: int)->pd.DataFrame:
     try:
         query = """SELECT * FROM example 
         WHERE DATETIME BETWEEN ? AND ? 
+        AND   HOUSE = ?
         ORDER BY DATETIME;"""
-        df:pd.DataFrame = pd.read_sql_query(query, con, params=(dateStart, dateEnd))
+        df:pd.DataFrame = pd.read_sql_query(query, con, params=(dateStart, dateEnd, house))
         return df
     
     except sql.Error as error:
@@ -31,7 +32,7 @@ def main():
 
     generator.generateSequence(con, 10000)
 
-    df = getWindow(con, "2024-10", "2024-10-31")
+    df = getWindow(con, "2024-10", "2024-10-31", 1)
 
     con.close()
 

@@ -25,7 +25,7 @@ def generate(con:sql.Connection, entries: int)->None:
     
 def generateSequence(con:sql.Connection, entries:int)->None:
     query = """INSERT INTO example VALUES(?,?,?,?,?);"""
-    date = datetime.now()
+    date = datetime.fromisoformat("2024-09-01")
     Temp  = round(random() + 25, 2)
     Humd  = round(random() + 20, 2)
     Moist = round(random() + 30, 2)
@@ -60,7 +60,7 @@ def main()->None:
         """
         con.execute(query)
 
-        generate(con, 10000)
+        generateSequence(con, 10000)
         con.commit()
         # query = """INSERT INTO example VALUES(?,?,?,?,?);"""
 
