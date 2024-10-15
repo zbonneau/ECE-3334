@@ -7,8 +7,10 @@ from matplotlib.figure import Figure
 from matplotlib.ticker import MaxNLocator
 from datetime import datetime
 import pandas as pd
-from DBFunc import DBInit, DBClose
+from DBFunc import DBInit
 from DBVisual import getWindow
+from HouseParameters import GetHouseParams, SetHouseParams
+import globals
 
 class PlotCanvas(FigureCanvas):
     def __init__(self, parent=None):
@@ -36,7 +38,7 @@ class PlotCanvas(FigureCanvas):
         self.draw()
 
 class DataViewTab(QWidget):
-    def __init__(self) -> None:
+    def __init__(self, path: str) -> None:
         super().__init__()
         # self.tabLabel = QLabel("View GreenHouse Data")
         self.canvas = PlotCanvas(self)
@@ -49,6 +51,7 @@ class DataViewTab(QWidget):
         self.dtStart     = QLineEdit(f"{datetime.today().year}-{datetime.today().month}")
         self.EndLabel    = QLabel("End Date")
         self.dtEnd       = QLineEdit(datetime.today().date().__str__())
+        self.DBpath      = path
 
         layout = QVBoxLayout()
         grid = QGridLayout()
@@ -71,9 +74,8 @@ class DataViewTab(QWidget):
         
 
     def viewData(self)->None:
-        path = "Main\\Monitor\\test.db"
 
-        con,error = DBInit(path)
+        con,error = DBInit(self.DBpath)
 
         if not con:
             return
@@ -84,7 +86,7 @@ class DataViewTab(QWidget):
         self.canvas.plot(df, f"House: {self.houseSelect.text()} Date/Time: {self.dtStart.text()} -- {self.dtEnd.text()}")
 
 class HouseConfigTab(QWidget):
-    def __init__(self)->None:
+    def __init__(self, path: str)->None:
         super().__init__()
         # self.tabLabel = QLabel("Configure House Parameters")
         self.getCurrent = QPushButton("Get Current Parameters")
@@ -111,6 +113,7 @@ class HouseConfigTab(QWidget):
 
         self.configureLabel =  QLabel("Config Results: ")
         self.configureResult = QLabel("")
+        self.DBpath = path
 
         layout = QVBoxLayout()
         grid = QGridLayout()
@@ -144,27 +147,76 @@ class HouseConfigTab(QWidget):
         
 
     def getCurrentParams(self)->None:
-        pass
+        try:
+            house = (int)(self.houseValue.text())
+        except ValueError as error:
+            self.configureResult.setText(error.__str__())
+            return
+        
+        params, error = GetHouseParams(self.DBpath, self.houseValue.text())
+        if error:
+            self.configureResult.setText(error)
+        else:
+            self.houseValue.setText(   (str)(params[0]))
+            self.tempMinValue.setText( (str)(params[1]))
+            self.tempMaxValue.setText( (str)(params[2]))
+            self.HumdMinValue.setText( (str)(params[3]))
+            self.HumdMaxValue.setText( (str)(params[4]))
+            self.MoistMinValue.setText((str)(params[5]))
+            self.MoistMaxValue.setText((str)(params[6]))
 
     def setParams(self)->None:
-        pass
+        try:
+            house  = (int)(self.houseValue.text())
+            params =   ((float)(self.tempMinValue.text()),
+                        (float)(self.tempMaxValue.text()),
+                        (float)(self.HumdMinValue.text()),
+                        (float)(self.HumdMaxValue.text()),
+                        (float)(self.MoistMinValue.text()),
+                        (float)(self.MoistMaxValue.text())
+                        )
+        except ValueError as error:
+            self.configureResult.setText(error.__str__())
+            return
+        
+        if(params[0] > params[1]):
+            self.configureResult.setText(f"Temp Min ({params[0]}) must be < Temp Max ({params[1]})")
+        elif(params[0] < globals.TEMP_MIN_ABS):
+            self.configureResult.setText(f"Temp Min ({params[0]}) must be >= {globals.TEMP_MIN_ABS}")
+        elif(params[1] > globals.TEMP_MAX_ABS):
+            self.configureResult.setText(f"Temp Max ({params[1]}) must be <= {globals.TEMP_MAX_ABS}")
+        elif(params[2] > params[3]):
+            self.configureResult.setText(f"Humidity Min ({params[2]}) must be < Humidity Max ({params[3]})")
+        elif(params[2] < globals.HUMD_MIN_ABS):
+            self.configureResult.setText(f"Humidity Min ({params[2]}) must be >= {globals.HUMD_MIN_ABS}")
+        elif(params[3] > globals.HUMD_MAX_ABS):
+            self.configureResult.setText(f"Humidity Max ({params[3]}) must be <= {globals.HUMD_MAX_ABS}")
+        elif(params[4] > params[5]):
+            self.configureResult.setText(f"Moisture Min ({params[4]}) must be < Moisture Max ({params[5]})")
+        elif(params[4] < globals.MOIST_MIN_ABS):
+            self.configureResult.setText(f"Moisture Min ({params[4]}) must be >= {globals.MOIST_MIN_ABS}")
+        elif(params[5] > globals.MOIST_MAX_ABS):
+            self.configureResult.setText(f"Moisture Max ({params[5]}) must be <= {globals.MOIST_MAX_ABS}")
+        else:
+            self.configureResult.setText(SetHouseParams(path, house, params))
 
 
 class App(QMainWindow):
-    def __init__(self)->None:
+    def __init__(self, path)->None:
         super().__init__()
         self.setWindowTitle("Automated Greenhouse")
         self.setGeometry(100,100,800,800)
 
         container = QTabWidget()
-        container.addTab(DataViewTab(), "View Data")
-        container.addTab(HouseConfigTab(), "Config House")
+        container.addTab(DataViewTab(path), "View Data")
+        container.addTab(HouseConfigTab(path), "Config House")
         self.setCentralWidget(container)
 
 
 if __name__ == "__main__":
+    path = "Main\\Monitor\\test.db"
     app = QApplication(sys.argv)
-    window = App()
+    window = App(path)
     window.show()
     sys.exit(app.exec())
         
