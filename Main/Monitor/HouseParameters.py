@@ -1,12 +1,8 @@
 import sqlite3 as sql
-from DBFunc import DBInit, DBInsert, DBCommit
-import pandas as pd
 
 def GetHouseParams(path:str, houseID: int)->tuple[tuple, str]:
     try: 
-        con, error = DBInit(path)
-        if error:
-            return None, error
+        con = sql.Connection(path)
 
         query = """ SELECT * FROM HouseConfig
                     WHERE HOUSEID = ?"""
