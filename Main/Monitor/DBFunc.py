@@ -15,12 +15,26 @@ def DBClose(con:sql.Connection)->tuple[bool,str]:
     except sql.Error as error:
         return (False, error.__str__())
     
-def DBInsert(con:sql.Connection, query:str, params:tuple[any])->tuple[bool,str]:
+def DBSearch(path:str, query: str, params: tuple)->tuple:
     try:
-        con.execute(query, params)
-        return (True,None)
+        con:sql.Connection = sql.connect(path)
+        cursor = con.cursor()
+        cursor.execute(query, params)
+        return (cursor.fetchall())
+        
     except sql.Error as error:
-        return (False, error.__str__())
+        print(error)
+        return None
+    
+def DBInsert(path: str, query: str, params: tuple)->str:
+    try:
+        con:sql.Connection = sql.connect(path)
+        con.execute(query, params)
+        con.close()
+        return None
+
+    except sql.Error as error:
+        return error.__str__()
 
 def DBCommit(con:sql.Connection)->tuple[bool, str]:
     try:
@@ -44,6 +58,20 @@ def stringParse(string: str, args:int)->tuple[any]:
     )
 
     return params
+
+def parseData(string: str, params: int)->tuple[str]:
+    try:
+        parts = string.split(", ")
+        if (params != parts.__len__()):
+            print("Did not parse correct number of data")
+            return None
+        return (part.split(": ")[1] for part in parts)
+    
+    except Exception as e:
+        print(e.__str__())
+        return None
+
+
 
     
 def main():
