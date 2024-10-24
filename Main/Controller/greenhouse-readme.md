@@ -50,7 +50,7 @@ A Raspberry Pi-based system for monitoring and controlling a greenhouse environm
 
 ## Setup Instructions
 
-1. Create Virtual Environment:
+1. Create Virtual Environment(It has already been created):
 ```bash
 python3 -m venv greenhouse_env
 ```
@@ -84,7 +84,7 @@ chmod +x greenhouse_fan.py
 1. Ensure your virtual environment is activated
 2. Run the main script:
 ```bash
-sudo python3 greenhouse_main.py
+python3 greenhouse_main.py
 ```
 
 ## Environmental Parameters
@@ -92,36 +92,3 @@ sudo python3 greenhouse_main.py
 - Temperature Range: 15.5°C - 26.7°C (60°F - 80°F)
 - Maximum Humidity: 60%
 - Water Detection: Binary (Present/Not Present)
-
-## System Operation
-
-- The system continuously monitors temperature and humidity
-- Fan activates when temperature or humidity exceeds thresholds
-- Water sensor provides real-time water detection
-- All sensor data is logged to the console
-
-## Troubleshooting
-
-If you encounter errors:
-1. Check all physical connections
-2. Verify virtual environment is activated
-3. Confirm all required packages are installed
-4. Ensure proper permissions (sudo) when running
-
-## Maintenance
-
-- Regularly check sensor connections
-- Clean sensors as needed
-- Update threshold values in code if required
-- Monitor system logs for any anomalies
-
-## Future Expansions
-
-System is designed for easy expansion with additional modules:
-- Soil moisture sensors
-- pH monitoring
-- Automated watering
-- Data logging
-- Remote monitoring
-
-For questions or issues, please refer to documentation or raise an issue in the repository.
