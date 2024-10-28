@@ -2,6 +2,7 @@
 import importlib
 import time
 import sys
+from globals import glo
 
 # List of modules to run
 modules = ['greenhouse_dht22', 'greenhouse_fan', 'greenhouse_water_sensor']
@@ -24,10 +25,10 @@ for module_name, module in module_instances.items():
 try:
     while True:
         # Read sensor data
-        temperature, humidity = module_instances['greenhouse_dht22'].read_sensor()
+        glo.realTemp, glo.realHumd = module_instances['greenhouse_dht22'].read_sensor()
         
         # Run fan control with sensor data
-        module_instances['greenhouse_fan'].run(temperature, humidity)
+        module_instances['greenhouse_fan'].run(glo.realTemp, glo.realHumd)
         
         # Check water sensor
         water_detected = module_instances['greenhouse_water_sensor'].run()

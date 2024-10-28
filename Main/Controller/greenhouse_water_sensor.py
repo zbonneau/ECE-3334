@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import RPi.GPIO as GPIO
 import time
+from globals import glo, WATER_SENSOR_PIN
 
 # Configuration
-WATER_SENSOR_PIN = 17  # GPIO17
+# WATER_SENSOR_PIN = 17  # GPIO17
 CHECK_INTERVAL = 5  # seconds
 
 def initialize():
