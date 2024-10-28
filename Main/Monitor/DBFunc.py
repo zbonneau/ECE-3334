@@ -1,20 +1,6 @@
 import sqlite3 as sql
 
 
-def DBInit(path:str)->tuple[sql.Connection,str]:
-    try:
-        con = sql.connect(path)
-        return (con, None)
-    except sql.Error as error:
-        return (None, error.__str__)
-    
-def DBClose(con:sql.Connection)->tuple[bool,str]:
-    try:
-        con.close()
-        return True, None
-    except sql.Error as error:
-        return (False, error.__str__())
-    
 def DBSearch(path:str, query: str, params: tuple)->tuple:
     try:
         con:sql.Connection = sql.connect(path)
@@ -30,16 +16,46 @@ def DBInsert(path: str, query: str, params: tuple)->str:
     try:
         con:sql.Connection = sql.connect(path)
         con.execute(query, params)
+        con.commit()
         con.close()
         return None
 
     except sql.Error as error:
         return error.__str__()
 
+def parseData(string: str, params: int)->tuple[str]:
+    try:
+        parts = string.split(", ")
+        if (params != parts.__len__()):
+            print("Did not parse correct number of data")
+            return None
+        return (part.split(": ")[1] for part in parts)
+    
+    except Exception as e:
+        print(e.__str__())
+        return None
+
+
+### Depricated scripts
+
 def DBCommit(con:sql.Connection)->tuple[bool, str]:
     try:
         con.commit()
         return (True, None)
+    except sql.Error as error:
+        return (False, error.__str__())
+
+def DBInit(path:str)->tuple[sql.Connection,str]:
+    try:
+        con = sql.connect(path)
+        return (con, None)
+    except sql.Error as error:
+        return (None, error.__str__)
+    
+def DBClose(con:sql.Connection)->tuple[bool,str]:
+    try:
+        con.close()
+        return True, None
     except sql.Error as error:
         return (False, error.__str__())
 
@@ -59,20 +75,7 @@ def stringParse(string: str, args:int)->tuple[any]:
 
     return params
 
-def parseData(string: str, params: int)->tuple[str]:
-    try:
-        parts = string.split(", ")
-        if (params != parts.__len__()):
-            print("Did not parse correct number of data")
-            return None
-        return (part.split(": ")[1] for part in parts)
-    
-    except Exception as e:
-        print(e.__str__())
-        return None
-
-
-
+  
     
 def main():
     path:str = "Main\\Monitor\\test.db"

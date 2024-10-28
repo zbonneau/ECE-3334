@@ -71,7 +71,6 @@ class DataViewTab(QWidget):
         layout.addWidget(self.canvas)
 
         self.setLayout(layout)
-        
 
     def viewData(self)->None:
 
@@ -144,8 +143,6 @@ class HouseConfigTab(QWidget):
 
         self.setLayout(layout)
         
-        
-
     def getCurrentParams(self)->None:
         try:
             house = (int)(self.houseValue.text())
@@ -156,6 +153,8 @@ class HouseConfigTab(QWidget):
         params, error = GetHouseParams(self.DBpath, self.houseValue.text())
         if error:
             self.configureResult.setText(error)
+        elif params is None:
+            self.configureResult.setText("No house exists with that ID")
         else:
             self.houseValue.setText(   (str)(params[0]))
             self.tempMinValue.setText( (str)(params[1]))

@@ -1,43 +1,36 @@
 import sqlite3 as sql
+from DBFunc import DBSearch, DBInsert
+from globals import glo
 
 def GetHouseParams(path:str, houseID: int)->tuple[tuple, str]:
-    try: 
-        con = sql.Connection(path)
+    global glo
+    query = """ SELECT * FROM HouseConfig
+                WHERE HOUSEID = ?"""
+    params = DBSearch(glo.path, query, (houseID,))
 
-        query = """ SELECT * FROM HouseConfig
-                    WHERE HOUSEID = ?"""
-        cursor = con.cursor()
-
-        cursor.execute(query, (houseID,))
-        params = cursor.fetchone()
-        
-        return params, None
-
-    except sql.Error as error:
-        return None, error.__str__()
+    return params
     
 def SetHouseParams(path: str, houseID: int, params: tuple)->str:
     if params.__len__() != 6:
         return f"Params of len {params.__len__()}. Must be 6"
     
-    try:
-        con = sql.Connection(path)
-        query = """UPDATE HouseConfig SET
-                    TEMPMIN = ?,
-                    TEMPMAX = ?,
-                    HUMDMIN = ?,
-                    HUMDMAX = ?,
-                    MOISTMIN = ?,
-                    MOISTMAX = ?
-                    WHERE HOUSEID = ?;"""
-        
-        con.execute(query, params + (houseID,))
-        con.commit()
-        con.close()
-        return f"House {houseID} params updated successfully in DB"
+    global glo
+    query = """UPDATE HouseConfig SET
+                TEMPMIN = ?,
+                TEMPMAX = ?,
+                HUMDMIN = ?,
+                HUMDMAX = ?,
+                MOISTMIN = ?,
+                MOISTMAX = ?
+                WHERE HOUSEID = ?;"""
     
-    except sql.Error as error:
-        return error.__str__()
+    error = DBInsert(glo.path, query, (params + (houseID,)))
+
+    if error is not None:
+        return error
+    else:
+        return f"House {houseID} params updated successfully in DB"
+
         
 
 
