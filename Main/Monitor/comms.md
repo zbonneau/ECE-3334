@@ -1,68 +1,57 @@
 # Communication system
 
-## Connection sequence
-1. server listens for connection
-2. server accepts connection
-3. Server sends connection message
-4. Client sends ID
-5. Server connects client object with house ID
-6. If client has been configured, send config values
-7. If client has been configured, server gets config values
-   1. Server updates HouseConfig Table with config values
-8. Else, client requests config values
-   1. Server gets config values from house table, sends to client
-   2. Client accepts or rejects configs
+## Connection sequence - Monitor
+1. Power on Pi
+2. Establish SSH
 
-## loop
-9. If server receives data, update data Table
-10. If server receives config Request, send config values
-11. If User sets config values, update table, send to client
-    1. If client rejects, inform user, cancel table update 
+Loop
+3. Listen for Connection - Accept
+4. case(recv):
+    - get_config(HouseID): send(set_config SQL(SELECT CONFIG WHERE houseID = recv))
+    - send_config(Config): if (recv(config.Timestamp) >= SQL(CONFIG).TimeStamp):
+        - T: update SQL Config, break
+        - F: send(set_config SQL(Config))
+    - reject_config(): Warn User, break 4
+5. send(get_data SQL(SELECT DATETIME FROM Data WHERE HouseID = config, orderby DATETIME).fetchone or None)
+6. while connection is open:  SQL(INSERT recv(send_data(DATA)))
 
-## Communication formats
+## Connection Sequence - Controller
+1. Power on Pi
+2. Establish SSH
+3. Connect to Monitor
 
-### client: send_data
-    send_data DATETIME: 2024-10-20 12:15, HOUSEID: 1, TEMP: 23.45, HUMIDITY: 34.23, MOISTURE: 24.54
-    DATETIME: str
-    HOUSEID: int
-    TEMP: float
-    HUMIDITY: float
-    MOISTURE: float
+Loop
+4. Config.ini has values
+    - N: send(get_config(HouseID))
+    - Y: send(send_config(config))
+5. case(recv)
+    - set_config(config): is valid?
+        - N: send(reject Config)
+        - Y: is recv.config.timeStamp newer than config.ini?
+            - Y: update config
+        - send(send_config)
+    - get_data(Timestamp)
+        - data = SQL(SELECT * FROM data WHERE DATETIME > TimeStamp ORDERBY DATETIME).fetchall()
+        - send(send_data Data) for Data in data
+        - close connection
+        - SQL(DELETE FROM data WHERE DATETIME <= TimeStamp)
 
-### client: send_config
-    send_config HOUSEID: 1, TEMPMIN: 12.0, TEMPMAX: 33.2, HUMDMIN: 30.5, HUMDMAX: 57.8, MOISTMIN: 14.5, MOISTMAX: 43.5
-    HOUSEID: int
-    TEMPMIN: float
-    TEMPMAX: float
-    HUMDMIN: float
-    HUMDMAX: float
-    MOISTMIN: float
-    MOISTMAX: float
+6. Every {Time Interval}: Capture Data
+7. if (open connection):
+    - Y: Loop
+    - N: SQL(Insert Data into data), loop 6
 
-### client: accept_config
-    accept_config HOUSEID: 1
+## Communication commands - Monitor
+### set_config HOUSEID:int, TEMPMIN: float, TEMPMAX: float, HUMDMIN: float, HUMDMAX:float, MOISTMIN: float, MOISTMAX: float, TIMESTAMP: str
 
-### client: reject_config
-    reject_config HOUSEID: 1
+### get_data HOUSEID: int, TIMESTAMP: str
 
-### server: get_ID
-    get_ID
+## Communication commands - Controller
+### get_config HOUSEID: int
 
-### client: send_ID
-    send_ID HOUSEID: 1
+### send_config HOUSEID: int, TEMPMIN: float, TEMPMAX: float, HUMDMIN: float, HUMDMAX:float, MOISTMIN: float, MOISTMAX: float, TIMESTAMP: str
 
-### client: request_ID
-    request_ID HOUSEID: 0
+### reject_config Error: str
 
-### client: request_config
-    request_config HOUSEID: 1
+### send_data HOUSEID:int, TIMESTAMP: str, TEMP: float, HUMD: float, MOIST: float
 
-### server: set_config
-    set_config HOUSEID: 1, TEMPMIN: 12.0, TEMPMAX: 33.2, HUMDMIN: 30.5, HUMDMAX: 57.8, MOISTMIN: 14.5, MOISTMAX: 43.5
-    HOUSEID: int
-    TEMPMIN: float
-    TEMPMAX: float
-    HUMDMIN: float
-    HUMDMAX: float
-    MOISTMIN: float
-    MOISTMAX: float

@@ -1,5 +1,7 @@
 import socket
 import threading
+import sqlite3 as sql
+from DBFunc import DBSearch
 TEMP_MIN_ABS = 0
 TEMP_MAX_ABS = 100
 HUMD_MIN_ABS = 0
@@ -8,33 +10,80 @@ MOIST_MIN_ABS = 0
 MOIST_MAX_ABS = 100
 DBPATH = "Main\\Monitor\\test.db"
 PORT = 5000
+HOUSEPARAMS = 8
+GET_DATA_QUERY = """
+SELECT TIMESTAMP FROM data 
+WHERE HOUSEID = ?
+ORDER BY TIMESTAMP
+"""
+SEND_DATA_QUERY = """
+INSERT INTO data VALUES(?,?,?,?,?);"""
+DATASIZE = 5
 
+HOUSECONFIG_CREATE = """
+CREATE TABLE IF NOT EXISTS HouseConfig(
+HOUSEID   INTEGER,
+TEMPMIN   REAL,
+TEMPMAX   REAL,
+HUMDMIN   REAL,
+HUMDMAX   REAL,
+MOISTMIN  REAL,
+MOISTMAX  REAL,
+TIMESTAMP TEXT);
+""" # Create table plus dummy entry 
 
+DATA_TABLE_CREATE = """
+CREATE TABLE IF NOT EXISTS data(
+TIMESTAMP TEXT,
+HOUSEID   INTEGER,
+TEMP      REAL,
+HUMIDITY  REAL,
+MOISTURE  REAL
+);
+""" # Create table plus dummy entry 
 
+## moved to globals.py to prevent circular dependency
+def DBInitConfig(path:str)->None:
+    try:
+        con = sql.connect(path)
+        con.execute(HOUSECONFIG_CREATE)
+        con.execute("INSERT INTO HouseConfig VALUES(0,0,100,0,100,0,100,?); ", ("0000-00-00 00:00",))
+        con.commit()
+        con.close()
+        
+    except sql.Error as error:
+        print(f"Init Failed: {error}")
+
+def DBInitData(path:str)->None:
+    try:
+        con = sql.connect(path)
+        con.execute(DATA_TABLE_CREATE)
+        con.execute("INSERT INTO data VALUES(0000-00-00 00:00, 0, 0, 0, 0);")
+        con.commit()
+        con.close()
+        
+    except sql.Error as error:
+        print(f"Init Failed: {error}")
 
 class globals:
     def __init__(self):
-        self.clients: dict[int:(socket.socket)] = {}
+        self.con: socket.socket = None
         self.path:str = DBPATH
         self.port:int = PORT
 
-    def addClient(self, con:socket.socket, houseID: int)->None:
-        if con is not None:
-            self.dropClient(houseID)
-            self.clients[houseID] = con
-            
-    def dropClient(self, houseID: int)->None:
-        if (self.clients[houseID] is None):
-            return
-        try:
-            client:socket.socket = self.clients[houseID]
-            client.close() 
-        except AttributeError:
-            pass
-        except OSError:
-            pass
-        finally:
-            del self.clients[houseID]
+        exists = DBSearch(self.path, "SELECT DISTINCT HOUSEID FROM HouseConfig", None)
+        if not exists:
+            DBInitConfig(self.path)
+        
+        exists = DBSearch(self.path, "SELECT DISTINCT HOUSEID FROM data", None)
+        if not exists:
+            DBInitData(self.path)
+
+
+
+    def closeCon(self):
+        if self.con:
+            self.con.close()
         
         
 

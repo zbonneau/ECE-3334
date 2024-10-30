@@ -1,6 +1,6 @@
 import socket
 import threading
-from globals import glo 
+from globals import glo, HOUSEPARAMS
 from DBFunc import parseData, DBInsert, DBSearch
 from HouseParameters import GetHouseParams, SetHouseParams
 

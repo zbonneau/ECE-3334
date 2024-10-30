@@ -1,11 +1,13 @@
 import sqlite3 as sql
 
-
 def DBSearch(path:str, query: str, params: tuple)->tuple:
     try:
         con:sql.Connection = sql.connect(path)
         cursor = con.cursor()
-        cursor.execute(query, params)
+        if params:
+            cursor.execute(query, params)
+        else:
+            cursor.execute(query)
         return (cursor.fetchall())
         
     except sql.Error as error:
@@ -15,7 +17,10 @@ def DBSearch(path:str, query: str, params: tuple)->tuple:
 def DBInsert(path: str, query: str, params: tuple)->str:
     try:
         con:sql.Connection = sql.connect(path)
-        con.execute(query, params)
+        if params:
+            con.execute(query, params)
+        else:
+            con.execute(query)
         con.commit()
         con.close()
         return None
@@ -29,7 +34,7 @@ def parseData(string: str, params: int)->tuple[str]:
         if (params != parts.__len__()):
             print("Did not parse correct number of data")
             return None
-        return (part.split(": ")[1] for part in parts)
+        return tuple(part.split(": ")[1] for part in parts)
     
     except Exception as e:
         print(e.__str__())
@@ -44,13 +49,6 @@ def DBCommit(con:sql.Connection)->tuple[bool, str]:
         return (True, None)
     except sql.Error as error:
         return (False, error.__str__())
-
-def DBInit(path:str)->tuple[sql.Connection,str]:
-    try:
-        con = sql.connect(path)
-        return (con, None)
-    except sql.Error as error:
-        return (None, error.__str__)
     
 def DBClose(con:sql.Connection)->tuple[bool,str]:
     try:

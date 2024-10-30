@@ -1,18 +1,18 @@
 import sqlite3 as sql
 from DBFunc import DBSearch, DBInsert
-from globals import glo
+from globals import glo, HOUSEPARAMS
 
-def GetHouseParams(path:str, houseID: int)->tuple[tuple, str]:
+def GetHouseParams(path:str, houseID: int)->tuple:
     global glo
     query = """ SELECT * FROM HouseConfig
                 WHERE HOUSEID = ?"""
     params = DBSearch(glo.path, query, (houseID,))
 
-    return params
+    return params[0] if params else None
     
 def SetHouseParams(path: str, houseID: int, params: tuple)->str:
-    if params.__len__() != 6:
-        return f"Params of len {params.__len__()}. Must be 6"
+    if params.__len__() != HOUSEPARAMS-1:
+        return f"Params of len {params.__len__()}. Must be {HOUSEPARAMS-1}"
     
     global glo
     query = """UPDATE HouseConfig SET
@@ -21,7 +21,8 @@ def SetHouseParams(path: str, houseID: int, params: tuple)->str:
                 HUMDMIN = ?,
                 HUMDMAX = ?,
                 MOISTMIN = ?,
-                MOISTMAX = ?
+                MOISTMAX = ?,
+                TIMESTAMP = ?
                 WHERE HOUSEID = ?;"""
     
     error = DBInsert(glo.path, query, (params + (houseID,)))
