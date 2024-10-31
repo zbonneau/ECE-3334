@@ -26,7 +26,7 @@ def emulateClient(client:socket)->bool:
 
 
 if __name__ == "__main__":
-    host = '10.161.65.185'
+    host = '127.0.0.1'
     port = 5000
     client = socket()
     try:

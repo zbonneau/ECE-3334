@@ -14,7 +14,7 @@ HOUSEPARAMS = 8
 GET_DATA_QUERY = """
 SELECT TIMESTAMP FROM data 
 WHERE HOUSEID = ?
-ORDER BY TIMESTAMP
+ORDER BY TIMESTAMP ASC;
 """
 SEND_DATA_QUERY = """
 INSERT INTO data VALUES(?,?,?,?,?);"""
@@ -35,12 +35,12 @@ TIMESTAMP TEXT);
 DATA_TABLE_CREATE = """
 CREATE TABLE IF NOT EXISTS data(
 TIMESTAMP TEXT,
-HOUSEID   INTEGER,
+HOUSEID   INTEGER,                          
 TEMP      REAL,
 HUMIDITY  REAL,
 MOISTURE  REAL
 );
-""" # Create table plus dummy entry 
+""" # 
 
 ## moved to globals.py to prevent circular dependency
 def DBInitConfig(path:str)->None:
@@ -52,18 +52,18 @@ def DBInitConfig(path:str)->None:
         con.close()
         
     except sql.Error as error:
-        print(f"Init Failed: {error}")
+        print(f"House Config Table Init Failed: {error}")
 
 def DBInitData(path:str)->None:
     try:
         con = sql.connect(path)
         con.execute(DATA_TABLE_CREATE)
-        con.execute("INSERT INTO data VALUES(0000-00-00 00:00, 0, 0, 0, 0);")
+        con.execute("INSERT INTO data VALUES(?, 0, 0, 0, 0);", ("0000-00-00 00:00",))
         con.commit()
         con.close()
         
     except sql.Error as error:
-        print(f"Init Failed: {error}")
+        print(f"Data Table Init Failed: {error}")
 
 class globals:
     def __init__(self):

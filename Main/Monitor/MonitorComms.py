@@ -15,6 +15,13 @@ def handleData(con: socket, data: str)->None:
             print(f"get_config parse failed: {error}")
             return
         
+        except IndexError as error:
+            print(f"get_config parse failed: {error}")
+            return
+        
+        except TypeError as error:
+            print(f"get_config parse failure: {error}")
+        
     elif data.startswith("send_config"):
         try:
             PiConfig = parseData(data, HOUSEPARAMS)
@@ -48,8 +55,8 @@ def handleData(con: socket, data: str)->None:
         params:tuple = parseData(data, DATASIZE)
         try:
             paramsFormat:tuple = (
-                int(params[0]),
                 params[1],
+                int(params[0]),
                 float(params[2]),
                 float(params[3]),
                 float(params[4]),
@@ -76,7 +83,7 @@ def set_config(con:socket, config: tuple[str])->None:
     if config is None:
         return
     try:
-        message:str = f"send_config HOUSEID: {int(config[0])}, TEMPMIN: {float(config[1])}, TEMPMAX: {float(config[2])}, HUMDMIN: {float(config[3])}, HUMDMAX: {float(config[4])}, MOISTMIN: {float(config[5])}, MOISTMAX: {float(config[6])}, TIMESTAMP: {config[7]}"
+        message:str = f"set_config HOUSEID: {int(config[0])}, TEMPMIN: {float(config[1])}, TEMPMAX: {float(config[2])}, HUMDMIN: {float(config[3])}, HUMDMAX: {float(config[4])}, MOISTMIN: {float(config[5])}, MOISTMAX: {float(config[6])}, TIMESTAMP: {config[7]}"
         con.send(message.encode())  
     except Exception as error:
         print(f"set_config failed: {error}")
@@ -84,7 +91,7 @@ def set_config(con:socket, config: tuple[str])->None:
 def get_data(con:socket, houseID: int)->None:
     TimeStamps:tuple[str] = DBSearch(glo.path, GET_DATA_QUERY, (houseID,))
     if TimeStamps is not None and TimeStamps.__len__() >0:
-        con.send(f"get_data HOUSEID: {houseID}, TIMESTAMP: {TimeStamps[0]}".encode())
+        con.send(f"get_data HOUSEID: {houseID}, TIMESTAMP: {TimeStamps[0][0]}".encode())
     else:
         con.send(f"get_data HOUSEID: {houseID}, TIMESTAMP: 0000-00-00 00:00".encode())
 
