@@ -1,4 +1,4 @@
-from globals import glo, HOUSEPARAMS, GET_DATA_QUERY, DATASIZE, SEND_DATA_QUERY
+from globals import glo, HOUSEPARAMS, GET_DATA_QUERY, DATASIZE, SEND_DATA_QUERY, DEBUG
 from socket import socket
 from DBFunc import parseData, DBSearch, DBInsert
 from HouseParameters import GetHouseParams, SetHouseParams
@@ -7,9 +7,11 @@ def handleData(con: socket, data: str)->None:
     
     if data.startswith("get_config"):
         try:
-            houseID:int = int(parseData(data, 1)[0])
-            config = get_config(houseID)
-            set_config(con, config)
+            params = parseData(data, 1)
+            if params:
+                houseID:int = int(params[0])
+                config = get_config(houseID)
+                set_config(con, config)
 
         except ValueError as error:
             print(f"get_config parse failed: {error}")
@@ -100,17 +102,26 @@ def serverMain()->None:
     host = '0.0.0.0'
     port = glo.port
 
-    server = socket()
+    glo.server = socket()
     try:
-        server.bind((host,port))
+        glo.server.bind((host,port))
+        glo.server.settimeout(10)
     except Exception as error:
         print(f"Server Init failed: {error}")
         return
     
+    
     while 1:
-        server.listen(1)
+        
+        glo.server.listen(1)
 
-        glo.con, addr = server.accept()
+        try:
+          glo.con, addr = glo.server.accept()
+
+        except TimeoutError:
+            if (DEBUG):
+                print("Server TimeOut")
+            continue
 
         while True:
             try:
@@ -128,4 +139,10 @@ def serverMain()->None:
 
 
 if __name__ == "__main__":
-    serverMain()
+    try:
+        serverMain()
+    except KeyboardInterrupt:
+        if (DEBUG):
+            print("Server Terminated by user (CTL+C)")
+        glo.closeCon()
+        glo.closeServer()

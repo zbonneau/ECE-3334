@@ -2,6 +2,7 @@ import socket
 import threading
 import sqlite3 as sql
 from DBFunc import DBSearch
+DEBUG = False
 TEMP_MIN_ABS = 0
 TEMP_MAX_ABS = 100
 HUMD_MIN_ABS = 0
@@ -14,7 +15,8 @@ HOUSEPARAMS = 8
 GET_DATA_QUERY = """
 SELECT TIMESTAMP FROM data 
 WHERE HOUSEID = ?
-ORDER BY TIMESTAMP ASC;
+ORDER BY TIMESTAMP DESC
+;
 """
 SEND_DATA_QUERY = """
 INSERT INTO data VALUES(?,?,?,?,?);"""
@@ -68,6 +70,7 @@ def DBInitData(path:str)->None:
 class globals:
     def __init__(self):
         self.con: socket.socket = None
+        self.server: socket.socket = None
         self.path:str = DBPATH
         self.port:int = PORT
 
@@ -80,6 +83,9 @@ class globals:
             DBInitData(self.path)
 
 
+    def closeServer(self):
+        if self.server:
+            self.server.close()
 
     def closeCon(self):
         if self.con:

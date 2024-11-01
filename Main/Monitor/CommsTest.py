@@ -1,4 +1,4 @@
-from socket import socket
+from socket import socket, SHUT_RDWR
 # from globals import PORT
 from threading import Thread
 
@@ -41,8 +41,9 @@ if __name__ == "__main__":
          if not emulateClient(client):
              break
          
-    client.close()
+    client.shutdown(SHUT_RDWR)
     thread.join()
+    client.close()
 
 
 
