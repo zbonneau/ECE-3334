@@ -8,6 +8,7 @@ WATER_SENSOR_PIN = 17  # GPIO17
 # CHECK_INTERVAL = 5  # seconds
 FAN_PIN = 14
 CONFIGPATH = "config.ini"
+DEBUG = True
 
 class Global:
     def __init__(self):
