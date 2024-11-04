@@ -2,7 +2,7 @@
 import time
 import board
 import adafruit_dht
-from globals import glo, DHT_PIN
+from globals import glo, DHT_PIN, DEBUG
 
 # Configuration
 # DHT_PIN = board.D4  # GPIO4
@@ -13,9 +13,9 @@ READ_INTERVAL = 2  # seconds
 last_read_time = 0
 
 def initialize():
-    global glo
     glo.dht_device = adafruit_dht.DHT22(DHT_PIN)
-    print("DHT22 sensor initialized")
+    if DEBUG:
+        print("DHT22 sensor initialized")
 
 def read_sensor():
     global last_read_time
@@ -23,6 +23,7 @@ def read_sensor():
     
     if current_time - last_read_time >= READ_INTERVAL:
         try:
+            glo.dht_device.measure()
             temperature = glo.dht_device.temperature
             humidity = glo.dht_device.humidity
             last_read_time = current_time
@@ -34,16 +35,17 @@ def read_sensor():
 
 def run():
     glo.realTemp, glo.realHumd = read_sensor()
-    if glo.realTemp is not None and glo.realHumd is not None:
-        print(f"Temperature: {glo.realTemp:.1f}°C, Humidity: {glo.realHumd:.1f}%")
-    else:
-        print("Waiting for valid sensor reading...")
+    if DEBUG:    
+        if glo.realTemp is not None and glo.realHumd is not None:
+            print(f"Temperature: {glo.realTemp:.1f}°C, Humidity: {glo.realHumd:.1f}%")
+        else:
+            print("Waiting for valid sensor reading...")
 
 def cleanup():
-    global glo
     if glo.dht_device:
         glo.dht_device.exit()
-    print("DHT22 sensor cleaned up")
+        if DEBUG:
+            print("DHT22 sensor cleaned up")
 
 if __name__ == "__main__":
     initialize()
