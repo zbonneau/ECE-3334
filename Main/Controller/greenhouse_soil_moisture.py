@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 import time
 import board
-from adafruit_seesaw.seesaw import Seesaw
-from globals import glo
+from Adafruit_Seesaw.seesaw import Seesaw
+from globals import glo, DEBUG
 
 def initialize():
     global i2c_bus, ss
     i2c_bus = board.I2C()
     ss = Seesaw(i2c_bus, addr=0x36)
-    print("Soil moisture sensor initialized")
+    if DEBUG:
+        print("Soil moisture sensor initialized")
 
 def read_sensor():
     global ss
@@ -23,12 +24,14 @@ def read_sensor():
 def run():
     moisture, temp = read_sensor()
     if moisture is not None and temp is not None:
-        print(f"temp: {temp}  moisture: {moisture}")
+        if DEBUG:
+            print(f"temp: {temp}  moisture: {moisture}")
         glo.realMoist = moisture
     return moisture, temp
 
 def cleanup():
-    print("Soil moisture sensor cleaned up")
+    if DEBUG:
+        print("Soil moisture sensor cleaned up")
 
 if __name__ == "__main__":
     initialize()

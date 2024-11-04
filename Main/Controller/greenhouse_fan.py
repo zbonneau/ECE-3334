@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import RPi.GPIO as GPIO
 import time
-from globals import glo, FAN_PIN
+from globals import glo, FAN_PIN, DEBUG
 
 # Configuration
 # FAN_PIN = 14
@@ -16,22 +16,25 @@ def initialize():
     print("Fan control initialized")
 
 def run():
-    global glo
     if glo.realTemp is not None and glo.realHumd is not None:
-        print(f"Fan control - Temp: {glo.realTemp:.1f}°C, Humidity: {glo.realHumd:.1f}%")
+        if DEBUG:
+            print(f"Fan control - Temp: {glo.realTemp:.1f}°C, Humidity: {glo.realHumd:.1f}%")
         
         if glo.realTemp > glo.tempMax or glo.realHumd > glo.humdMax:
             GPIO.output(FAN_PIN, GPIO.HIGH)
-            print(f"Fan ON (Pin: {FAN_PIN})")
+            if DEBUG:
+                print(f"Fan ON (Pin: {FAN_PIN})")
         elif glo.realTemp < glo.tempMin and glo.realHumd < glo.humdMax - 5:
             GPIO.output(FAN_PIN, GPIO.LOW)
-            print(f"Fan OFF (Pin: {FAN_PIN})")
-    else:
+            if DEBUG:
+                print(f"Fan OFF (Pin: {FAN_PIN})")
+    elif DEBUG:
         print("Fan control - Waiting for valid sensor reading...")
 
 def cleanup():
     GPIO.cleanup()
-    print("Fan control cleaned up")
+    if DEBUG:
+        print("Fan control cleaned up")
 
 if __name__ == "__main__":
     print("This module is not meant to be run directly.")

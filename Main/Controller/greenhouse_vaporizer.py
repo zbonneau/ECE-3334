@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import serial
 import time
-from globals import glo
+from globals import glo, DEBUG
 
 # Configuration
 VAPORIZER_PORT = '/dev/ttyUSB0'  # Common USB port on Linux/Raspberry Pi
@@ -11,7 +11,8 @@ def initialize():
     global vaporizer
     try:
         vaporizer = serial.Serial(VAPORIZER_PORT, BAUD_RATE)
-        print("Vaporizer initialized")
+        if DEBUG:
+            print("Vaporizer initialized")
         time.sleep(2)  # Wait for device to initialize
     except serial.SerialException as e:
         print(f"Error initializing vaporizer: {e}")
@@ -20,14 +21,16 @@ def initialize():
 def turn_on():
     try:
         vaporizer.write(b'ON\n')  # Example command
-        print("Vaporizer turned ON")
+        if DEBUG:
+            print("Vaporizer turned ON")
     except serial.SerialException as e:
         print(f"Error controlling vaporizer: {e}")
 
 def turn_off():
     try:
         vaporizer.write(b'OFF\n')  # Example command
-        print("Vaporizer turned OFF")
+        if DEBUG:
+            print("Vaporizer turned OFF")
     except serial.SerialException as e:
         print(f"Error controlling vaporizer: {e}")
 
