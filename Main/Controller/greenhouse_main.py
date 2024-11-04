@@ -3,8 +3,8 @@ import importlib
 import time
 import sys
 from globals import glo
-# List of modules to run
-modules = ['greenhouse_dht22', 'greenhouse_fan', 'greenhouse_water_sensor', 'greenhouse_soil_sensor', 'greenhouse_vaporizer']
+# List of modules to run - , 'greenhouse_soil_moisture', 'greenhouse_vaporizer'
+modules = ['greenhouse_dht22', 'greenhouse_fan', 'greenhouse_water_sensor']
 # Import modules dynamically
 module_instances = {}
 for module in modules:
@@ -24,18 +24,18 @@ try:
         glo.realTemp, glo.realHumd = module_instances['greenhouse_dht22'].read_sensor()
         
         # Run fan control with sensor data
-        module_instances['greenhouse_fan'].run(glo.realTemp, glo.realHumd)
+        module_instances['greenhouse_fan'].run()
         
         # Check water sensor
         water_detected = module_instances['greenhouse_water_sensor'].run()
         
         # Check soil moisture sensor
-        moisture, soil_temp = module_instances['greenhouse_soil_sensor'].run()
+        # moisture, soil_temp = module_instances['greenhouse_soil_sensor'].run()
         
         # Run vaporizer control
-        module_instances['greenhouse_vaporizer'].run()
+        # module_instances['greenhouse_vaporizer'].run()
         
-        time.sleep(2)  # Adjust the sleep time as needed
+        time.sleep(10)  # Adjust the sleep time as needed
 except KeyboardInterrupt:
     print("Greenhouse control terminated by user.")
 finally:
