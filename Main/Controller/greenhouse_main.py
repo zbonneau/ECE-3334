@@ -2,7 +2,7 @@
 import importlib
 import time
 import sys
-from globals import glo
+from globals import glo, DEBUG
 # List of modules to run - , 'greenhouse_soil_moisture', 'greenhouse_vaporizer'
 modules = ['greenhouse_dht22', 'greenhouse_fan', 'greenhouse_water_sensor']
 # Import modules dynamically
@@ -30,10 +30,14 @@ try:
         water_detected = module_instances['greenhouse_water_sensor'].run()
         
         # Check soil moisture sensor
-        # moisture, soil_temp = module_instances['greenhouse_soil_sensor'].run()
+        moisture, soil_temp = module_instances['greenhouse_soil_sensor'].run()
         
         # Run vaporizer control
         # module_instances['greenhouse_vaporizer'].run()
+
+        # run pump if necessary
+        if (DEBUG and moisture < glo.moistMin):
+            pass
         
         time.sleep(10)  # Adjust the sleep time as needed
 except KeyboardInterrupt:
