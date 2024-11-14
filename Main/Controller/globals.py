@@ -7,17 +7,17 @@ from socket import socket, SHUT_RDWR
 import sqlite3 as sql
 
 # DHT_PIN = board.D4  # GPIO4
-PUMP = 27
+PUMP        = 27
 PUMPRUNTIME = 2
-VAPORIZER =   # GPIO 
+VAPORIZER   = 22  # GPIO 
 VAPORIZERRUNTIME = 2  # seconds
 WATER_SENSOR_PIN = 17  # GPIO17
 # CHECK_INTERVAL = 5  # seconds
-FAN_PIN = 14
+FAN_PIN    = 14
 CONFIGPATH = "config.ini"
-DEBUG = True
-PORT = 5000
-IP = "127.0.0.1" # local host for dev
+DEBUG      = True
+PORT       = 5000
+IP         = "127.0.0.1" # local host for dev
 HOUSEPARAMS = 8
 PATH = "test.db"
 POLLINTERVAL = 15 # interval in minutes between house reads 
