@@ -21,6 +21,7 @@ IP         = "127.0.0.1" # local host for dev
 HOUSEPARAMS = 8
 PATH = "test.db"
 POLLINTERVAL = 15 # interval in minutes between house reads 
+MAXATTEMPTS = 3 # Maximum attempts to connect socket during poll
 
 def DBInitData(path:str)->None:
     try:
@@ -84,7 +85,7 @@ class Global:
         self.config.set('HouseParams', 'MoistMax',  self.moistMax.__str__())
         self.config.set('HouseParams', 'TimeStamp', self.timeStamp)
 
-        with open(PATH, 'w') as file:
+        with open(CONFIGPATH, 'w') as file:
             self.config.write(file)
 
     def editConfig(self, params:tuple)->bool:   

@@ -1,4 +1,4 @@
-from globals import glo, PORT, DEBUG, HOUSEPARAMS, POLLINTERVAL
+from globals import glo, PORT, DEBUG, HOUSEPARAMS, POLLINTERVAL, MAXATTEMPTS
 from socket import socket
 from DBFunc import DBInsert, DBSearch, parseData
 from datetime import datetime
@@ -41,6 +41,11 @@ def handleData(data:str)->bool: # returns true if loop should break
                 if DEBUG:
                     print(f"set_config failed: BAD MOIST >({formatted[5], formatted[6]})")
             
+            if (formatted[7] < glo.timeStamp):
+                passed = False
+                if DEBUG:
+                    print(f"set-config failed: OLD TIMESTAMP >({formatted[7]}, {glo.timeStamp})")
+
             if passed:
                 # Update house params if passed
                 glo.editConfig(formatted)
@@ -97,7 +102,7 @@ def send_data(data:tuple)->None:
         message+= f"TIMESTAMP: {data[0]}, "
         message+= f"TEMP: {data[2]}, "
         message+= f"HUMD: {data[3]}, "
-        message+= f"MOIST: {data[4]}"
+        message+= f"MOIST: {data[4]}\n"
         glo.socket.send(message.encode())
 
     except Exception as error:
@@ -116,14 +121,22 @@ def send_config()->None:
 
 def clientHandle()->None:
     glo.socket = socket()
+    #glo.socket.settimeout(10) # Timeout exception after 10 seconds
+    attempts = 0
 
     # Connect socket to server
     while True:
         try:
+            attempts += 1
             glo.socket.connect((glo.IP,PORT))
             if DEBUG:
-                print(f"Socekt connected to {glo.IP}:{PORT}")
+                print(f"Socket connected to {glo.IP}:{PORT}")
             break
+        except TimeoutError:
+            if DEBUG:
+                print("Timeout Error on attempted connection")
+            if attempts == MAXATTEMPTS:
+                break
         except Exception as error:
             print(f"Socket Connect Failed: {error}")
             ## this is where local storage of data would be used
@@ -131,6 +144,7 @@ def clientHandle()->None:
             if msg != 'r':
                 glo.IP = msg
 
+   # glo.socket.settimeout(None)
     # Run Init
     send_config()
 
@@ -141,7 +155,7 @@ def clientHandle()->None:
             print(f"Listen error: {error}")
             break
 
-        if handleData(data):
+        if not data or handleData(data):
             break
     
     glo.closeSocket()

@@ -10,8 +10,8 @@ def Listen(con:socket, addr)->None:
                 con.shutdown(SHUT_RDWR)
                 con.close()
                 return
-            
-            print(f"\nclient @{addr} >{data}\nserver > ", end='')
+            for line in data.splitlines():
+                print(f"\nclient @{addr[0]}:{addr[1]} >{line}\nserver >", end='')
     
     except Exception as error:
         print(error)
@@ -23,7 +23,8 @@ def respond(con:socket)->None:
             message = input()
             if (message == 'q'):
                 break
-            con.send(message.encode())
+            if con:
+                con.send(message.encode())
         
     except Exception as error:
         print(error)
@@ -33,6 +34,15 @@ if __name__ == "__main__":
     server.bind(('0.0.0.0', 5000))
 
     con = sql.Connection("Controller\\test.db")
+    con.execute("""
+            CREATE TABLE IF NOT EXISTS data(
+            TIMESTAMP TEXT,
+            HOUSEID   INTEGER,                          
+            TEMP      REAL,
+            HUMIDITY  REAL,
+            MOISTURE  REAL
+            );
+            """ )
     paramss = [
         ('2024-10-10 10:00', 1, 10, 20, 20),
         ('2024-10-10 10:15', 1, 11, 21, 22),
@@ -46,9 +56,14 @@ if __name__ == "__main__":
     con.commit()
     con.close()
 
+    server.settimeout(10)
     try:
         while True:
-            server.listen(1)
+            try:
+                server.listen(1)
+            
+            except TimeoutError:
+                continue
 
             con,addr = server.accept()
             task = Thread(target=Listen, args=(con,addr))
