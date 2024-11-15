@@ -122,14 +122,17 @@ def serverMain()->None:
             if (DEBUG):
                 print("Server TimeOut")
             continue
-
+        
         while True:
             try:
                 data = glo.con.recv(1024).decode()
                 if not data:
                     break
                 else:
-                    handleData(glo.con, data)
+                    for line in data.splitlines(): # sometimes socket combines multiple send() for efficiency. I must split them
+                        if DEBUG:
+                            print(f"pi@{addr[0]} >{line}")
+                        handleData(glo.con, line)
 
             except Exception as error:
                 print(error)
