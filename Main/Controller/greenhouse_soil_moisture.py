@@ -32,13 +32,19 @@ def read_sensor():
     except Exception as error:
         print(f"Error reading soil sensor: {error}")
         return None, None
+    
+def scaleMoisture(moisture:int)->float:
+    if moisture < glo.soilMin:
+        return 0 # 0%
+    if moisture > glo.soilMax:
+        return 100 # 100 %
+    return (moisture - glo.soilMin) * (100/(glo.soilMax-glo.soilMin)) # Linear scale 300-700 = 0% 100%
 
 def run():
     moisture, temp = read_sensor()
-    if moisture is not None and temp is not None:
-        if DEBUG:
-            print(f"temp: {temp}  moisture: {moisture}")
-        glo.realMoist = moisture
+    if moisture is not None and temp is not None and DEBUG:
+        print(f"temp: {temp}  moisture: {moisture}")
+    glo.realMoist = scaleMoisture(moisture)
     return moisture, temp
 
 def cleanup():

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from globals import glo, DEBUG
+from globals import glo, DEBUG, VAPORIZER, VAPORIZERRUNTIME
 import RPi.GPIO as GPIO
 from time import sleep
 
@@ -35,6 +35,7 @@ def test():
             return
 
 def cleanup() -> None:
+    GPIO.output(VAPORIZER, GPIO.LOW)
     GPIO.cleanup(VAPORIZER)
     if DEBUG:
         print("Vaporizer cleaned up")
