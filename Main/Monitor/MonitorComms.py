@@ -123,13 +123,16 @@ def serverMain()->None:
                 print("Server TimeOut")
             continue
         
+        buffer = ""
         while True:
             try:
                 data = glo.con.recv(1024).decode()
+                buffer += data # buffer data b/c TCP stream does not delimit messages
                 if not data:
                     break
                 else:
-                    for line in data.splitlines(): # sometimes socket combines multiple send() for efficiency. I must split them
+                    while '\n' in buffer: 
+                        line, buffer = buffer.split('\n', 1)
                         if DEBUG:
                             print(f"pi@{addr[0]} >{line}")
                         handleData(glo.con, line)
