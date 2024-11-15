@@ -10,9 +10,10 @@ def initialize()->None:
     print("PUMP initialized")
 
 def run()->None:
-    GPIO.output(PUMP, GPIO.HIGH)
-    sleep(PUMPRUNTIME)
-    GPIO.output(PUMP, GPIO.LOW)
+    if (glo.realMoist < glo.moistMin):
+        GPIO.output(PUMP, GPIO.HIGH)
+        sleep(PUMPRUNTIME)
+        GPIO.output(PUMP, GPIO.LOW)
 
 
 def test():
@@ -26,6 +27,7 @@ def test():
             return
 
 def cleanup()->None:
+    GPIO.output(PUMP, GPIO.LOW)
     GPIO.cleanup()
 
 if __name__ == "__main__":
