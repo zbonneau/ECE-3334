@@ -3,7 +3,6 @@ from DBFunc import DBSearch, DBInsert
 from globals import glo, HOUSEPARAMS
 
 def GetHouseParams(path:str, houseID: int)->tuple:
-    global glo
     query = """ SELECT * FROM HouseConfig
                 WHERE HOUSEID = ?"""
     params = DBSearch(glo.path, query, (houseID,))
@@ -14,18 +13,11 @@ def SetHouseParams(path: str, houseID: int, params: tuple)->str:
     if params.__len__() != HOUSEPARAMS-1:
         return f"Params of len {params.__len__()}. Must be {HOUSEPARAMS-1}"
     
-    global glo
-    query = """UPDATE HouseConfig SET
-                TEMPMIN = ?,
-                TEMPMAX = ?,
-                HUMDMIN = ?,
-                HUMDMAX = ?,
-                MOISTMIN = ?,
-                MOISTMAX = ?,
-                TIMESTAMP = ?
-                WHERE HOUSEID = ?;"""
+    DBInsert(glo.path, "DELETE FROM HouseConfig WHERE HOUSEID = ?", (houseID,))
+
+    query = """INSERT INTO HouseConfig VALUES(?,?,?,?,?,?,?,?);"""
     
-    error = DBInsert(glo.path, query, (params + (houseID,)))
+    error = DBInsert(glo.path, query, ((houseID,)+params))
 
     if error is not None:
         return error
