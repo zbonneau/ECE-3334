@@ -7,10 +7,10 @@ from matplotlib.figure import Figure
 from matplotlib.ticker import MaxNLocator
 from datetime import datetime
 import pandas as pd
-from DBFunc import DBInit
 from DBVisual import getWindow
 from HouseParameters import GetHouseParams, SetHouseParams
 import globals
+from datetime import datetime
 
 class PlotCanvas(FigureCanvas):
     def __init__(self, parent=None):
@@ -20,8 +20,8 @@ class PlotCanvas(FigureCanvas):
         self.fig = fig
 
     def plot(self, data:pd.DataFrame, title:str):
-        x = data["DATETIME"]
-        y = data.loc[:, ~data.columns.isin(["DATETIME", "HOUSE"])]
+        x = data["TIMESTAMP"]
+        y = data.loc[:, ~data.columns.isin(["TIMESTAMP", "HOUSEID"])]
 
         self.ax.clear()
         self.ax.plot(x,y, linewidth=2)
@@ -74,7 +74,7 @@ class DataViewTab(QWidget):
 
     def viewData(self)->None:
 
-        con,error = DBInit(self.DBpath)
+        con = sql.Connection(globals.DBPATH)
 
         if not con:
             return
@@ -150,10 +150,8 @@ class HouseConfigTab(QWidget):
             self.configureResult.setText(error.__str__())
             return
         
-        params, error = GetHouseParams(self.DBpath, self.houseValue.text())
-        if error:
-            self.configureResult.setText(error)
-        elif params is None:
+        params = GetHouseParams(self.DBpath, self.houseValue.text())
+        if params is None:
             self.configureResult.setText("No house exists with that ID")
         else:
             self.houseValue.setText(   (str)(params[0]))
@@ -172,7 +170,8 @@ class HouseConfigTab(QWidget):
                         (float)(self.HumdMinValue.text()),
                         (float)(self.HumdMaxValue.text()),
                         (float)(self.MoistMinValue.text()),
-                        (float)(self.MoistMaxValue.text())
+                        (float)(self.MoistMaxValue.text()),
+                        datetime.now().isoformat(sep=' ', timespec='minutes')
                         )
         except ValueError as error:
             self.configureResult.setText(error.__str__())
