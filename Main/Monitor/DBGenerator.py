@@ -4,7 +4,7 @@ from datetime import timedelta
 from random import random, randint
 
 def generate(con:sql.Connection, entries: int)->None:
-    query = """INSERT INTO example VALUES(?,?,?,?,?);"""
+    query = """INSERT INTO data VALUES(?,?,?,?,?);"""
     try:
             
         for _ in range(entries):
@@ -23,9 +23,9 @@ def generate(con:sql.Connection, entries: int)->None:
     except sql.Error as error:
         return
     
-def generateSequence(con:sql.Connection, entries:int)->None:
-    query = """INSERT INTO example VALUES(?,?,?,?,?);"""
-    date = datetime.fromisoformat("2024-09-01")
+def generateSequence(con:sql.Connection, entries:int, timestart: str)->None:
+    query = """INSERT INTO data VALUES(?,?,?,?,?);"""
+    date = datetime.fromisoformat(timestart)
     Temp  = round(random() + 25, 2)
     Humd  = round(random() + 20, 2)
     Moist = round(random() + 30, 2)
@@ -34,7 +34,7 @@ def generateSequence(con:sql.Connection, entries:int)->None:
         for _ in range(entries):
             date += timedelta(minutes=15)
             queryDT = date.isoformat(sep=" ", timespec="minutes")
-            House = randint(1,5)
+            House = 1
             Temp  = max(20,min(40, Temp  + round(random()-0.5,2)))
             Humd  = max(15,min(80, Humd  + round(random()-0.5,2)))
             Moist = max(10,min(60, Moist + round(random()-0.5,2)))
@@ -48,11 +48,11 @@ def generateSequence(con:sql.Connection, entries:int)->None:
 
 def main()->None:
     try:
-        con = sql.connect("Main\\Monitor\\test.db")
+        con = sql.connect("..\\Controller\\test.db")
 
-        query = """CREATE TABLE IF NOT EXISTS example(
-        DATETIME TEXT,
-        HOUSE INTEGER,
+        query = """CREATE TABLE IF NOT EXISTS data(
+        TIMESTAMP TEXT,
+        HOUSEID INTEGER,
         TEMP  REAL,
         HUMIDITY REAL,
         MOISTURE REAL
@@ -60,7 +60,7 @@ def main()->None:
         """
         con.execute(query)
 
-        generateSequence(con, 10000)
+        generateSequence(con, 1000, '2024-09-12')
         con.commit()
         # query = """INSERT INTO example VALUES(?,?,?,?,?);"""
 
