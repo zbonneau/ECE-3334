@@ -58,6 +58,8 @@ class Global:
             self.moistMin:  float   = self.config.getfloat("HouseParams", "MoistMin")
             self.moistMax:  float   = self.config.getfloat("HouseParams", "MoistMax")
             self.timeStamp: str     = self.config["HouseParams"]["TimeStamp"]
+            self.soilMin:   float   = self.config.getfloat("SoilSensor", "sensorMin", fallback=300)
+            self.soilMax:   float   = self.config.getfloat("SoilSensor", "sensorMax", fallback=700)
             self.realTemp:  float   = None
             self.realHumd:  float   = None
             self.realMoist: float   = None    
