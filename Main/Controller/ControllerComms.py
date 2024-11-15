@@ -107,14 +107,14 @@ def send_data(data:tuple)->None:
 
     except Exception as error:
         if DEBUG:
-            print("send_data() Error: {error}")
+            print(f"send_data() Error: {error}")
     
     
 def send_config()->None:
     message = f"send_config HOUSEID: {glo.houseID}, TEMPMIN: {glo.tempMin}, TEMPMAX: {glo.tempMax}, "  
     message+= f"HUMDMIN: {glo.humdMin}, HUMDMAX: {glo.humdMax}, "
     message+= f"MOISTMIN: {glo.moistMin}, MOISTMAX: {glo.moistMax}, "
-    message+= f"TIMESTAMP: {glo.timeStamp}"
+    message+= f"TIMESTAMP: {glo.timeStamp}\n"
 
     if glo.socket:
         glo.socket.send(message.encode())
