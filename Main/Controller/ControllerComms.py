@@ -178,11 +178,20 @@ def clientThread()->None:
         sleep((nextPoll-now).total_seconds())
         now = nextPoll
         # fetch current signals
-        #...
-        #start communication
-        clientHandle()
+        try:
+            params = (now.isoformat(sep=' ', timespec='minutes'),
+                    int(glo.houseID),
+                    float(glo.realTemp),
+                    float(glo.realHumd),
+                    float(glo.realMoist))
+            command = "INSERT INTO data VALUES(?,?,?,?,?);"
+            DBInsert(glo.path, command, params)
+        except Exception:
+            pass
 
-    
+        finally:
+            clientHandle()
+  
     
 if __name__ == "__main__":
     try:
