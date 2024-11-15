@@ -6,10 +6,10 @@ import DBGenerator as generator
 
 def getWindow(con:sql.Connection, dateStart: str, dateEnd: str, house: int)->pd.DataFrame:
     try:
-        query = """SELECT * FROM example 
-        WHERE DATETIME BETWEEN ? AND ? 
-        AND   HOUSE = ?
-        ORDER BY DATETIME;"""
+        query = """SELECT * FROM data 
+        WHERE TIMESTAMP BETWEEN ? AND ? 
+        AND   HOUSEID = ?
+        ORDER BY TIMESTAMP;"""
         df:pd.DataFrame = pd.read_sql_query(query, con, params=(dateStart, dateEnd, house))
         return df
     
