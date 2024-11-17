@@ -21,21 +21,35 @@ def main()->None:
         if hasattr(module, 'initialize'):
             module.initialize()
     now = time.time()
+    nextTime = now + CHECK_INTERVAL # 1 minute
     try:
-        while True:
-            nextTime = now + CHECK_INTERVAL # 1 minute
+        while not glo.closeApplication:
+            now = time.time()
+            sleepInterval = max(0, nextTime-now)
+            time.sleep(sleepInterval)  # Adjust the sleep time as needed
+            nextTime += CHECK_INTERVAL
             # Read sensor data
             glo.realTemp, glo.realHumd = module_instances['greenhouse_dht22'].read_sensor()
+            # Check soil moisture sensor
+            moisture, soil_temp = module_instances['greenhouse_soil_moisture'].run()
             
+            # Check water sensor
+            water_detected = module_instances['greenhouse_water_sensor'].run()
+            try:
+                message =  "===== Sensor Values ==============\n"
+                message += f" TEMP:  {glo.realTemp:.1f}\n"
+                message += f" HUMD:  {glo.realHumd:.1f}\n"
+                message += f" Moist: {glo.realMoist:.1f}\n"
+                if not water_detected:
+                    message += "Warning: Needs Water. Please Refill\n\n"
+
+                print(message)
+            except Exception:
+                continue
             # Run fan control and vaproizer with sensor data
             module_instances['greenhouse_fan'].run()
             module_instances['greenhouse_vaporizer'].run()
             
-            # Check water sensor
-            water_detected = module_instances['greenhouse_water_sensor'].run()
-            
-            # Check soil moisture sensor
-            moisture, soil_temp = module_instances['greenhouse_soil_sensor'].run()
 
             # run pump if necessary
             if water_detected:
@@ -43,10 +57,7 @@ def main()->None:
                 pass
             elif DEBUG:
                 print("Needs more water")
-            now = time.time()
-            sleepInterval = max(0, nextTime-now)
-            time.sleep(sleepInterval)  # Adjust the sleep time as needed
-            now = nextTime
+
 
     except KeyboardInterrupt:
         print("Greenhouse control terminated by user.")
@@ -58,4 +69,5 @@ def main()->None:
 
 
 if __name__ == "__main__":
+    DEBUG = True
     main()
