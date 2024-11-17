@@ -1,7 +1,8 @@
-from globals import glo, PORT, DEBUG, HOUSEPARAMS, POLLINTERVAL, MAXATTEMPTS
+from globals import glo, PORT, HOUSEPARAMS, POLLINTERVAL, MAXATTEMPTS
+from globals import DEBUGCOMMS as DEBUG
 from socket import socket
 from DBFunc import DBInsert, DBSearch, parseData
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 def handleData(data:str)->bool: # returns true if loop should break
@@ -103,6 +104,10 @@ def send_data(data:tuple)->None:
         message+= f"TEMP: {data[2]}, "
         message+= f"HUMD: {data[3]}, "
         message+= f"MOIST: {data[4]}\n"
+        
+        if DEBUG:
+            print(f"pi >{message}")
+
         glo.socket.send(message.encode())
 
     except Exception as error:
@@ -116,6 +121,8 @@ def send_config()->None:
     message+= f"MOISTMIN: {glo.moistMin}, MOISTMAX: {glo.moistMax}, "
     message+= f"TIMESTAMP: {glo.timeStamp}\n"
 
+    if DEBUG:
+        print(f"pi >{message}")
     if glo.socket:
         glo.socket.send(message.encode())
 
@@ -155,6 +162,9 @@ def clientHandle()->None:
             print(f"Listen error: {error}")
             break
 
+        if DEBUG:
+            print(f"server@{glo.IP} >{data}")
+
         if not data or handleData(data):
             break
     
@@ -164,22 +174,28 @@ def clientThread()->None:
     from time import sleep
 
     # Generate poll every POLLINTERVAL minutes
-    now = datetime.now()
-    while True:
-        nextPoll = (now.minute // POLLINTERVAL + 1) * POLLINTERVAL
+    interval = timedelta(minutes = POLLINTERVAL)
+    while not glo.closeApplication:
+        # nextPoll = (now.minute // POLLINTERVAL + 1) * POLLINTERVAL
 
-        if (nextPoll >= 60):
-            nextPoll = now.replace(hour = now.hour + nextPoll // 60,
-                                minute = nextPoll % 60,
-                                second = 0)
-        else:
-            nextPoll = now.replace(minute= nextPoll, second=0)
+        # if (nextPoll >= 60):
+        #     nextPoll = now.replace(hour = now.hour + nextPoll // 60,
+        #                         minute = nextPoll % 60,
+        #                         second = 0)
+        # else:
+        #     nextPoll = now.replace(minute= nextPoll, second=0)
+        now = datetime.now()
+        nextPoll = now.replace(minute= (now.minute//POLLINTERVAL) * POLLINTERVAL, second = 0, microsecond=0)
+        nextPoll += interval        
+        print(f"Next Poll @ {nextPoll.isoformat(sep=' ', timespec= 'minutes')}")
         
         sleep((nextPoll-now).total_seconds())
-        now = nextPoll
+        if glo.closeApplication:
+            break # Check after long sleep
+        
         # fetch current signals
         try:
-            params = (now.isoformat(sep=' ', timespec='minutes'),
+            params = (nextPoll.isoformat(sep=' ', timespec='minutes'),
                     int(glo.houseID),
                     float(glo.realTemp),
                     float(glo.realHumd),
