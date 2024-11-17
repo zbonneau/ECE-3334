@@ -14,7 +14,8 @@ def initialize():
     GPIO.setwarnings(False)
     GPIO.setup(FAN_PIN, GPIO.OUT)
     GPIO.output(FAN_PIN, GPIO.LOW)
-    print("Fan control initialized")
+    if DEBUG:
+        print("Fan control initialized")
 
 def run():
     if glo.realTemp is not None and glo.realHumd is not None:

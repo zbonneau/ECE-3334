@@ -1,4 +1,4 @@
-from globals import glo, PUMP, PUMPRUNTIME
+from globals import glo, DEBUG, PUMP, PUMPRUNTIME
 import RPi.GPIO as GPIO
 from time import sleep
 
@@ -7,7 +7,8 @@ def initialize()->None:
     GPIO.setwarnings(False)
     GPIO.setup(PUMP, GPIO.OUT)
     GPIO.output(PUMP, GPIO.LOW)
-    print("PUMP initialized")
+    if DEBUG:
+        print("PUMP initialized")
 
 def run()->None:
     if (glo.realMoist < glo.moistMin):
