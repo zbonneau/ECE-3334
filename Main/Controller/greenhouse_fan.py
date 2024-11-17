@@ -13,6 +13,7 @@ def initialize():
     GPIO.setmode(GPIO.BCM)
     GPIO.setwarnings(False)
     GPIO.setup(FAN_PIN, GPIO.OUT)
+    GPIO.output(FAN_PIN, GPIO.LOW)
     print("Fan control initialized")
 
 def run():
@@ -32,7 +33,8 @@ def run():
         print("Fan control - Waiting for valid sensor reading...")
 
 def cleanup():
-    GPIO.cleanup()
+    GPIO.output(FAN_PIN, GPIO.LOW)
+    GPIO.cleanup(FAN_PIN)
     if DEBUG:
         print("Fan control cleaned up")
 

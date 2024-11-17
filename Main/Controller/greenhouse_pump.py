@@ -28,10 +28,11 @@ def test():
 
 def cleanup()->None:
     GPIO.output(PUMP, GPIO.LOW)
-    GPIO.cleanup()
+    GPIO.cleanup(PUMP)
 
 if __name__ == "__main__":
-    
+    glo.realMoist = 20
+    glo.moistMin = 30
     initialize()
     test()
     cleanup()

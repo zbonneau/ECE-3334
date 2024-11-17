@@ -27,13 +27,19 @@ A Raspberry Pi-based system for monitoring and controlling a greenhouse environm
 * Control → GPIO14 (Pin 8)
 
 ### Soil Moisture Sensor
-* VCC → 3.3V power
-* GND → Ground
-* SDA → I2C SDA
-* SCL → I2C SCL
+* VCC → 3.3V power (Blue)
+* GND → Ground (Green)
+* SDA → I2C SDA (Orange, pin 3)
+* SCL → I2C SCL (Red, pin 5)
 
 ### Vaporizer
-* USB Connection to Raspberry Pi
+* GPIO 22 (Pin 15)
+
+### Pump 
+* GPIO 27 (Pin 13)
+* Blue = Negative 
+* Brown = Pos
+* Yellow = GND (DISCONNECTED)
 
 ## Files and Their Functions
 

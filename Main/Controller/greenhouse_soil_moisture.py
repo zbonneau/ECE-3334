@@ -11,6 +11,10 @@ from globals import glo, DEBUG
 #   damp = 500-600
 #   mud  = 600-700
 #   water = 700+
+
+
+
+#  new values water = 1000
 # For %:
 #   0% = 300
 # 100% = 700

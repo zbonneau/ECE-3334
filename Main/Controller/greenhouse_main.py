@@ -2,7 +2,7 @@
 import importlib
 import time
 import sys
-from globals import glo, DEBUG
+from globals import glo, DEBUG, CHECK_INTERVAL
 
 def main()->None:
     # List of modules to run - 
@@ -23,7 +23,7 @@ def main()->None:
     now = time.time()
     try:
         while True:
-            nextTime = now + 60 # 1 minute
+            nextTime = now + CHECK_INTERVAL # 1 minute
             # Read sensor data
             glo.realTemp, glo.realHumd = module_instances['greenhouse_dht22'].read_sensor()
             
@@ -40,6 +40,7 @@ def main()->None:
             # run pump if necessary
             if water_detected:
                 module_instances['greenhouse_pump'].run()
+                pass
             elif DEBUG:
                 print("Needs more water")
             now = time.time()
@@ -54,3 +55,7 @@ def main()->None:
         for module_name, module in module_instances.items():
             if hasattr(module, 'cleanup'):
                 module.cleanup()
+
+
+if __name__ == "__main__":
+    main()

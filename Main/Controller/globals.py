@@ -1,18 +1,18 @@
-# import RPi.GPIO as GPIO
-# import board
+import RPi.GPIO as GPIO
+import board
 import configparser
 from datetime import datetime
-# import adafruit_dht as dht
+import adafruit_dht as dht
 from socket import socket, SHUT_RDWR
 import sqlite3 as sql
 
-# DHT_PIN = board.D4  # GPIO4
+DHT_PIN = board.D4  # GPIO4
 PUMP        = 27
 PUMPRUNTIME = 2
 VAPORIZER   = 22  # GPIO 
-VAPORIZERRUNTIME = 2  # seconds
+VAPORIZERRUNTIME = 20  # seconds
 WATER_SENSOR_PIN = 17  # GPIO17
-# CHECK_INTERVAL = 5  # seconds
+CHECK_INTERVAL = 10  # seconds
 FAN_PIN    = 14
 CONFIGPATH = "config.ini"
 DEBUG      = True
