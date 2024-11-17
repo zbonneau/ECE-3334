@@ -1,7 +1,8 @@
-from globals import glo, HOUSEPARAMS, GET_DATA_QUERY, DATASIZE, SEND_DATA_QUERY, DEBUG
+from globals import glo, HOUSEPARAMS, GET_DATA_QUERY, DATASIZE, SEND_DATA_QUERY, DEBUG, VERBOSE
 from socket import socket
 from DBFunc import parseData, DBSearch, DBInsert
 from HouseParameters import GetHouseParams, SetHouseParams
+from datetime import datetime
 
 def handleData(con: socket, data: str)->None:
     
@@ -70,6 +71,7 @@ def handleData(con: socket, data: str)->None:
             return
     else:
         print(f"error: Unknown network command: {data}")
+        raise SyntaxError("Unkown network command. Possibly alien client")
 
 def get_config(houseID: int)->tuple[str]:
     try:
@@ -86,6 +88,8 @@ def set_config(con:socket, config: tuple[str])->None:
         return
     try:
         message:str = f"set_config HOUSEID: {int(config[0])}, TEMPMIN: {float(config[1])}, TEMPMAX: {float(config[2])}, HUMDMIN: {float(config[3])}, HUMDMAX: {float(config[4])}, MOISTMIN: {float(config[5])}, MOISTMAX: {float(config[6])}, TIMESTAMP: {config[7]}"
+        if VERBOSE:
+            print(f"server >{message}")
         con.send(message.encode())  
     except Exception as error:
         print(f"set_config failed: {error}")
@@ -93,9 +97,13 @@ def set_config(con:socket, config: tuple[str])->None:
 def get_data(con:socket, houseID: int)->None:
     TimeStamps:tuple[str] = DBSearch(glo.path, GET_DATA_QUERY, (houseID,))
     if TimeStamps is not None and TimeStamps.__len__() >0:
-        con.send(f"get_data HOUSEID: {houseID}, TIMESTAMP: {TimeStamps[0][0]}".encode())
+        message = f"get_data HOUSEID: {houseID}, TIMESTAMP: {TimeStamps[0][0]}"
     else:
-        con.send(f"get_data HOUSEID: {houseID}, TIMESTAMP: 0000-00-00 00:00".encode())
+        message = f"get_data HOUSEID: {houseID}, TIMESTAMP: 0000-00-00 00:00"
+    
+    if VERBOSE:
+        print(f"server >{message}")
+    con.send(message.encode())
 
 def serverMain()->None:
     
@@ -123,6 +131,7 @@ def serverMain()->None:
                 print("Server TimeOut")
             continue
         
+        print(f"\nNew Connection: pi@{addr[0]} | {datetime.now().isoformat(sep=' ', timespec='minutes')}")
         buffer = ""
         while True:
             try:
@@ -133,7 +142,7 @@ def serverMain()->None:
                 else:
                     while '\n' in buffer: 
                         line, buffer = buffer.split('\n', 1)
-                        if DEBUG:
+                        if VERBOSE:
                             print(f"pi@{addr[0]} >{line}")
                         handleData(glo.con, line)
 

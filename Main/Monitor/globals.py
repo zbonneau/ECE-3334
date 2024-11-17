@@ -3,6 +3,7 @@ import threading
 import sqlite3 as sql
 from DBFunc import DBSearch
 DEBUG = False
+VERBOSE = True
 TEMP_MIN_ABS = 0
 TEMP_MAX_ABS = 100
 HUMD_MIN_ABS = 0
