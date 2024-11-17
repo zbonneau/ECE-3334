@@ -12,14 +12,15 @@ PUMPRUNTIME = 2
 VAPORIZER   = 22  # GPIO 
 VAPORIZERRUNTIME = 20  # seconds
 WATER_SENSOR_PIN = 17  # GPIO17
-CHECK_INTERVAL = 10  # seconds
+CHECK_INTERVAL = 30  # seconds
 FAN_PIN    = 14
 CONFIGPATH = "config.ini"
-DEBUG      = True
+DEBUG      = False
+DEBUGCOMMS = True
 PORT       = 5000
-IP         = "127.0.0.1" # local host for dev
+IP         = "153.33.96.50" # local host for dev
 HOUSEPARAMS = 8
-PATH = "test.db"
+PATH = "prod.db"
 POLLINTERVAL = 15 # interval in minutes between house reads 
 MAXATTEMPTS = 3 # Maximum attempts to connect socket during poll
 
@@ -59,15 +60,23 @@ class Global:
             self.moistMax:  float   = self.config.getfloat("HouseParams", "MoistMax")
             self.timeStamp: str     = self.config["HouseParams"]["TimeStamp"]
             self.soilMin:   float   = self.config.getfloat("SoilSensor", "sensorMin", fallback=300)
-            self.soilMax:   float   = self.config.getfloat("SoilSensor", "sensorMax", fallback=700)
+            self.soilMax:   float   = self.config.getfloat("SoilSensor", "sensorMax", fallback=1000)
             self.realTemp:  float   = None
             self.realHumd:  float   = None
-            self.realMoist: float   = None    
+            self.realMoist: float   = None   
+            self.closeApplication = False # set true by top script to end threads safely 
 
         except ValueError as error:
             print(f"Startup Failed: {error}")
             return 
 
+        message =   "===== STARTUP ==================\n"
+        message += f"  HOUSEID: {self.houseID}\n"
+        message += f"  TEMP  MIN/MAX: {self.tempMin:.1f}:{self.tempMax:.1f}\n"
+        message += f"  HUMD  MIN/MAX: {self.humdMin:.1f}:{self.humdMax:.1f}\n"
+        message += f"  MOIST MIN/MAX: {self.moistMin:.1f}:{self.moistMax:.1f}\n"
+        message += f"  TIMESTAMP: {self.timeStamp}\n"
+        print(message)
         
         self.dht_device: dht.DHT22 = None
 
@@ -103,6 +112,13 @@ class Global:
             self.moistMin   = params[5]
             self.moistMax   = params[6]
             self.timeStamp  = params[7]
+            if DEBUG or DEBUGCOMMS:
+                message =   "===== CONFIG EDIT ==================\n"
+                message += f"  HOUSEID: {self.houseID}\n"
+                message += f"  TEMP  MIN/MAX: {self.tempMin:.1f}:{self.tempMax:.1f}\n"
+                message += f"  HUMD  MIN/MAX: {self.humdMin:.1f}:{self.humdMax:.1f}\n"
+                message += f"  MOIST MIN/MAX: {self.moistMin:.1f}:{self.moistMax:.1f}\n"
+                message += f"  TIMESTAMP: {self.timeStamp}\n"
             self.saveConfig()
             return True
         
