@@ -5,6 +5,7 @@ from datetime import datetime
 import adafruit_dht as dht
 from socket import socket, SHUT_RDWR
 import sqlite3 as sql
+from sys import argv
 
 DHT_PIN = board.D4  # GPIO4
 PUMP        = 27
@@ -18,7 +19,7 @@ CONFIGPATH = "config.ini"
 DEBUG      = False
 DEBUGCOMMS = True
 PORT       = 5000
-IP         = "153.33.96.50" # local host for dev
+IP         = "10.131.16.152" # local host for dev
 HOUSEPARAMS = 8
 PATH = "prod.db"
 POLLINTERVAL = 15 # interval in minutes between house reads 
@@ -82,6 +83,8 @@ class Global:
 
         self.socket:socket = None
         self.IP = IP
+        if argv.__len__() >1:
+            self.IP = argv[1]
         self.path = PATH
 
         DBInitData(PATH)
