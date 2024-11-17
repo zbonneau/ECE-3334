@@ -128,6 +128,7 @@ def send_config()->None:
 
 def clientHandle()->None:
     glo.socket = socket()
+    glo.socket.settimeout(20)
     #glo.socket.settimeout(10) # Timeout exception after 10 seconds
     attempts = 0
 
@@ -139,17 +140,21 @@ def clientHandle()->None:
             if DEBUG:
                 print(f"Socket connected to {glo.IP}:{PORT}")
             break
-        except TimeoutError:
-            if DEBUG:
-                print("Timeout Error on attempted connection")
-            if attempts == MAXATTEMPTS:
-                break
+        # except TimeoutError:
+        #     if DEBUG:
+        #         print("Timeout Error on attempted connection")
+        #     glo.closeSocket()
+        #     # if attempts == MAXATTEMPTS:
+        #     #     glo.closeSocket()
+        #     return
         except Exception as error:
-            print(f"Socket Connect Failed: {error}")
-            ## this is where local storage of data would be used
-            msg = input("Enter new IP address of server or r to retry: ")
-            if msg != 'r':
-                glo.IP = msg
+            glo.closeSocket()
+            return
+            # print(f"Socket Connect Failed: {error}")
+            # ## this is where local storage of data would be used
+            # msg = input("Enter new IP address of server or r to retry: ")
+            # if msg != 'r':
+            #     glo.IP = msg
 
    # glo.socket.settimeout(None)
     # Run Init
