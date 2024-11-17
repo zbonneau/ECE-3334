@@ -33,6 +33,7 @@ if __name__ == "__main__":
         client.connect((host, port))
     except Exception as error:
         print(f"Connect failed: {error}")
+        exit(1)
 
     thread:Thread = Thread(target=listenServer, args=(client,))
     thread.start()
