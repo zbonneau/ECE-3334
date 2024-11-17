@@ -16,11 +16,11 @@ def initialize() -> None:
         print("Vaporizer initialized")
 
 def run() -> None:
-    if glo.realHumd is not None:
-        if glo.realHumd < glo.humdMin:
-            GPIO.output(VAPORIZER, GPIO.HIGH)
-            sleep(VAPORIZERRUNTIME)
-            GPIO.output(VAPORIZER, GPIO.LOW)
+    if glo.realHumd is not None and glo.realHumd < glo.humdMin:
+        GPIO.output(VAPORIZER, GPIO.HIGH)
+    else:
+        GPIO.output(VAPORIZER, GPIO.LOW)
+            
 
 def test():
     while True:
