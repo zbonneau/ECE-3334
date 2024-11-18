@@ -1,4 +1,7 @@
 # Communication system
+ cmd oneliner
+ - <path\to\dir>\env\scripts\activate && cd <path\to\dir>\main\monitor && python MonitorComms.py
+ - C:\Users\Zack\ECE-3334\env\scripts\activate && cd C:\Users\Zack\ECE-3334\main\monitor && python MonitorComms.py
 
 ## Connection sequence - Monitor
 1. Power on Pi
