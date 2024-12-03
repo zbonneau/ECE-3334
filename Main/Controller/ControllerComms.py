@@ -140,23 +140,10 @@ def clientHandle()->None:
             if DEBUG:
                 print(f"Socket connected to {glo.IP}:{PORT}")
             break
-        # except TimeoutError:
-        #     if DEBUG:
-        #         print("Timeout Error on attempted connection")
-        #     glo.closeSocket()
-        #     # if attempts == MAXATTEMPTS:
-        #     #     glo.closeSocket()
-        #     return
         except Exception as error:
             glo.closeSocket()
             return
-            # print(f"Socket Connect Failed: {error}")
-            # ## this is where local storage of data would be used
-            # msg = input("Enter new IP address of server or r to retry: ")
-            # if msg != 'r':
-            #     glo.IP = msg
-
-   # glo.socket.settimeout(None)
+    
     # Run Init
     send_config()
 
@@ -181,14 +168,6 @@ def clientThread()->None:
     # Generate poll every POLLINTERVAL minutes
     interval = timedelta(minutes = POLLINTERVAL)
     while not glo.closeApplication:
-        # nextPoll = (now.minute // POLLINTERVAL + 1) * POLLINTERVAL
-
-        # if (nextPoll >= 60):
-        #     nextPoll = now.replace(hour = now.hour + nextPoll // 60,
-        #                         minute = nextPoll % 60,
-        #                         second = 0)
-        # else:
-        #     nextPoll = now.replace(minute= nextPoll, second=0)
         now = datetime.now()
         nextPoll = now.replace(minute= (now.minute//POLLINTERVAL) * POLLINTERVAL, second = 0, microsecond=0)
         nextPoll += interval        
@@ -198,7 +177,7 @@ def clientThread()->None:
         if glo.closeApplication:
             break # Check after long sleep
         
-        # fetch current signals
+        # fetch current signals, place in local DB
         try:
             params = (nextPoll.isoformat(sep=' ', timespec='minutes'),
                     int(glo.houseID),
@@ -208,6 +187,7 @@ def clientThread()->None:
             command = "INSERT INTO data VALUES(?,?,?,?,?);"
             DBInsert(glo.path, command, params)
         except Exception:
+            # Generic Exception Handler. Does nothing with exception, just prevents program exit
             pass
 
         finally:
